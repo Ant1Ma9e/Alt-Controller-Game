@@ -30,6 +30,9 @@ namespace AltControllerGame
         [Tooltip("是否避免在玩家上一次面向的方位重复生成,提高节奏感。")]
         [SerializeField] private bool avoidLastKilledDirection = true;
 
+        [Tooltip("是否在 Start 时自动生成敌人。挂上 GameManager 时把它关掉,由 GameManager 控制开始。")]
+        [SerializeField] private bool autoStart = true;
+
         private readonly Dictionary<int, Enemy> activeEnemies = new Dictionary<int, Enemy>();
         private int lastKilledDirection = -1;
         private PlayerController playerController;
@@ -60,11 +63,33 @@ namespace AltControllerGame
                 currentFacingDirection = playerController.CurrentDirectionIndex;
             }
 
-            for (int i = 0; i < maxConcurrent; i++)
+            if (autoStart)
             {
-                SpawnOne();
+                StartRound();
             }
         }
+
+        /// <summary>开始一轮:清干净场上敌人 + 生成 maxConcurrent 只。</summary>
+        public void StartRound()
+        {
+            StopRound();
+            for (int i = 0; i < maxConcurrent; i++) SpawnOne();
+        }
+
+        /// <summary>结束一轮:取消重生计时,立刻清除所有现存敌人(不播击杀音)。</summary>
+        public void StopRound()
+        {
+            CancelInvoke();
+            foreach (var pair in activeEnemies)
+            {
+                if (pair.Value != null) Destroy(pair.Value.gameObject);
+            }
+            activeEnemies.Clear();
+            lastKilledDirection = -1;
+        }
+
+        /// <summary>给外部(如 GameManager)在 Awake 阶段切换 autoStart。</summary>
+        public void SetAutoStart(bool value) { autoStart = value; }
 
         private void OnDestroy()
         {

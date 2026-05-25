@@ -319,7 +319,7 @@ MonoBehaviour:
   facingAlertClip: {fileID: 8300000, guid: 1dae84e08f477f04cba5beb82c53cae6, type: 3}
   killClip: {fileID: 8300000, guid: 861d7f0a0b882664183d463aec27f074, type: 3}
   killClipVolume: 1
-  ambientLoopGap: 0.2
+  ambientLoopGap: 1
   facingAlertLoopGap: 0.2
   switchSilence: 0.2
 --- !u!82 &47249645592118566
