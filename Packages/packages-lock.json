@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "com.canopteks.switchcontrollerinput": {
+      "version": "https://github.com/Meorge/JoyConUnityInputSystem.git?path=/Packages/com.canopteks.switchcontrollerinput",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.inputsystem": "1.7.0"
+      },
+      "hash": "740d0d47304f0e7a5621e95c665ec78442440323"
+    },
     "com.unity.burst": {
       "version": "1.8.21",
       "depth": 1,
@@ -47,6 +56,15 @@
       "depth": 0,
       "source": "registry",
       "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.inputsystem": {
+      "version": "1.14.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.uielements": "1.0.0"
+      },
       "url": "https://packages.unity.com"
     },
     "com.unity.mathematics": {
