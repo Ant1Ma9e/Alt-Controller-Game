@@ -20,8 +20,6 @@ namespace AltControllerGame
         [Header("游戏参数")]
         [Tooltip("一局游戏时长(秒)。")]
         [SerializeField] private float gameDuration = 60f;
-        [Tooltip("每次命中击杀获得的分数。")]
-        [SerializeField] private int scorePerKill = 100;
 
         [Header("排行榜")]
         [Tooltip("保存的最高分条数。")]
@@ -62,14 +60,14 @@ namespace AltControllerGame
 
         private void Start()
         {
-            if (player != null) player.OnSlashPerformed += HandleSlash;
+            if (spawner != null) spawner.OnEnemyKilled += HandleEnemyKilled;
             leaderboardCache = LeaderboardStorage.Load(leaderboardSize);
             EnterMenu();
         }
 
         private void OnDestroy()
         {
-            if (player != null) player.OnSlashPerformed -= HandleSlash;
+            if (spawner != null) spawner.OnEnemyKilled -= HandleEnemyKilled;
         }
 
         private void Update()
@@ -122,10 +120,12 @@ namespace AltControllerGame
             leaderboardCache = LeaderboardStorage.Load(leaderboardSize);
         }
 
-        private void HandleSlash(bool hit)
+        private void HandleEnemyKilled(Enemy enemy)
         {
-            if (currentState != State.Playing || !hit) return;
-            currentScore += scorePerKill;
+            if (currentState != State.Playing || enemy == null) return;
+            // 普通敌人 +100,小猫咪 -50,具体数值取自各 Enemy 的 ScoreValue。
+            currentScore += enemy.ScoreValue;
+            if (currentScore < 0) currentScore = 0;
             OnScoreChanged?.Invoke(currentScore);
         }
 

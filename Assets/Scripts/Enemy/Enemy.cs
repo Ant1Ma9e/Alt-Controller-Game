@@ -11,6 +11,14 @@ namespace AltControllerGame
     [RequireComponent(typeof(AudioSource))]
     public class Enemy : MonoBehaviour
     {
+        public enum EnemyType { Normal, Kitten }
+
+        [Header("种类与计分")]
+        [Tooltip("敌人种类。普通敌人加分,小猫咪扣分。")]
+        [SerializeField] private EnemyType enemyType = EnemyType.Normal;
+        [Tooltip("被玩家击杀时影响的分数。普通敌人为正(+100),小猫咪为负(-50)。")]
+        [SerializeField] private int scoreValue = 100;
+
         [Header("音效片段")]
         [Tooltip("循环播放的环绕音(3D 空间音)。")]
         [SerializeField] private AudioClip ambientClip;
@@ -47,6 +55,8 @@ namespace AltControllerGame
 
         public int DirectionIndex => directionIndex;
         public bool IsAlive => isAlive;
+        public EnemyType Type => enemyType;
+        public int ScoreValue => scoreValue;
 
         /// <summary>敌人被击杀时触发。</summary>
         public event Action<Enemy> OnDied;

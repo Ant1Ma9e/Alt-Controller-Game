@@ -1,17 +1,21 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace AltControllerGame
 {
     /// <summary>
-    /// 在玩家周围 8 个固定方位生成敌人。最多同时存在 maxConcurrent 只;
-    /// 每死亡一只就在另一个未被占用的方位再生成一只。
+    /// 在玩家周围 8 个固定方位生成敌人。始终维持场上恰好 1 只普通敌人 + 1 只小猫咪;
+    /// 任意一只被击杀后,延迟在另一个未被占用的方位补生成同种类的一只。
     /// </summary>
     public class EnemySpawner : MonoBehaviour
     {
         [Header("引用")]
         [SerializeField] private Transform player;
+        [Tooltip("普通敌人预制体(击杀加分)。")]
         [SerializeField] private Enemy enemyPrefab;
+        [Tooltip("小猫咪预制体(击杀扣分)。留空则只生成普通敌人。")]
+        [SerializeField] private Enemy kittenPrefab;
 
         [Header("生成参数")]
         [Tooltip("敌人围绕玩家的半径(米)。")]
@@ -19,10 +23,6 @@ namespace AltControllerGame
 
         [Tooltip("敌人 Y 轴高度(相对玩家位置)。")]
         [SerializeField] private float spawnHeightOffset = 0f;
-
-        [Tooltip("场上同时存在的最大敌人数。")]
-        [Range(1, 8)]
-        [SerializeField] private int maxConcurrent = 1;
 
         [Tooltip("敌人死亡后再次生成的延迟(秒)。")]
         [SerializeField] private float respawnDelay = 3f;
@@ -40,6 +40,9 @@ namespace AltControllerGame
 
         public IReadOnlyDictionary<int, Enemy> ActiveEnemies => activeEnemies;
         public int ActiveCount => activeEnemies.Count;
+
+        /// <summary>敌人被玩家击杀时触发(StopRound 的清场不触发)。</summary>
+        public event Action<Enemy> OnEnemyKilled;
 
         private void Start()
         {
@@ -69,11 +72,12 @@ namespace AltControllerGame
             }
         }
 
-        /// <summary>开始一轮:清干净场上敌人 + 生成 maxConcurrent 只。</summary>
+        /// <summary>开始一轮:清场后生成 1 只普通敌人 + 1 只小猫咪。</summary>
         public void StartRound()
         {
             StopRound();
-            for (int i = 0; i < maxConcurrent; i++) SpawnOne();
+            SpawnEnemy(Enemy.EnemyType.Normal);
+            if (kittenPrefab != null) SpawnEnemy(Enemy.EnemyType.Kitten);
         }
 
         /// <summary>结束一轮:取消重生计时,立刻清除所有现存敌人(不播击杀音)。</summary>
@@ -123,7 +127,14 @@ namespace AltControllerGame
             {
                 activeEnemies.Remove(dir);
                 lastKilledDirection = dir;
-                Invoke(nameof(SpawnOne), Mathf.Max(0f, respawnDelay));
+                OnEnemyKilled?.Invoke(enemy);
+
+                // 维持场上始终 1 猫 + 1 怪:死了哪种就补哪种。
+                float delay = Mathf.Max(0f, respawnDelay);
+                if (enemy.Type == Enemy.EnemyType.Kitten)
+                    Invoke(nameof(RespawnKitten), delay);
+                else
+                    Invoke(nameof(RespawnNormal), delay);
             }
         }
 
@@ -134,8 +145,15 @@ namespace AltControllerGame
             return e;
         }
 
-        private void SpawnOne()
+        // 供 Invoke 调用的无参包装。
+        private void RespawnNormal() => SpawnEnemy(Enemy.EnemyType.Normal);
+        private void RespawnKitten() => SpawnEnemy(Enemy.EnemyType.Kitten);
+
+        private void SpawnEnemy(Enemy.EnemyType type)
         {
+            Enemy prefab = type == Enemy.EnemyType.Kitten ? kittenPrefab : enemyPrefab;
+            if (prefab == null) return;
+
             int dir = PickFreeDirection();
             if (dir < 0) return;
 
@@ -146,8 +164,8 @@ namespace AltControllerGame
                 new Vector3(player.position.x - pos.x, 0f, player.position.z - pos.z).normalized,
                 Vector3.up);
 
-            Enemy enemy = Instantiate(enemyPrefab, pos, lookAtPlayer, transform);
-            enemy.name = $"Enemy_Dir{dir}";
+            Enemy enemy = Instantiate(prefab, pos, lookAtPlayer, transform);
+            enemy.name = type == Enemy.EnemyType.Kitten ? $"Kitten_Dir{dir}" : $"Enemy_Dir{dir}";
             enemy.Initialize(this, dir);
             activeEnemies[dir] = enemy;
 
@@ -175,7 +193,7 @@ namespace AltControllerGame
             }
 
             if (candidates.Count == 0) return -1;
-            return candidates[Random.Range(0, candidates.Count)];
+            return candidates[UnityEngine.Random.Range(0, candidates.Count)];
         }
 
         private int CountFreeExcluding(int excluded)

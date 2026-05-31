@@ -280,7 +280,7 @@ GameObject:
   - component: {fileID: 3827026217483111142}
   - component: {fileID: 47249645592118566}
   m_Layer: 0
-  m_Name: Enemy
+  m_Name: Kitten
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -296,7 +296,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3041645211390202030}
@@ -315,11 +315,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b21b9892d7e943d41932df9e2d293453, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyType: 0
-  scoreValue: 100
-  ambientClip: {fileID: 8300000, guid: 23be93b7daccec94298ef74efb7c864e, type: 3}
-  facingAlertClip: {fileID: 8300000, guid: 1dae84e08f477f04cba5beb82c53cae6, type: 3}
-  killClip: {fileID: 8300000, guid: 1551a3ad6c075c541bb475e15c9805f2, type: 3}
+  enemyType: 1
+  scoreValue: -50
+  ambientClip: {fileID: 8300000, guid: 0e19c808306cd6d4ebffdaa901b612c5, type: 3}
+  facingAlertClip: {fileID: 8300000, guid: 0e19c808306cd6d4ebffdaa901b612c5, type: 3}
+  killClip: {fileID: 8300000, guid: d1dee57216ad6e84dbcbc0891c7597ec, type: 3}
   killClipVolume: 1
   ambientLoopGap: 1
   facingAlertLoopGap: 0.2
